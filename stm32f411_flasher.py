@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-from elftools.elf.elffile import ELFFile
-from glob import glob
 from time import sleep
-from tracemalloc import start
 import RPi.GPIO as GPIO
 import serial
 import sys
+import os
 
 # RPi GPIO Pins used for flashing
 LED = 7
@@ -52,11 +50,13 @@ read_protect.append(0x82)
 read_protect.append(0x7D)
 
 # Flash memory address
-flash_add = bytearray()
-flash_add.append(0x08)
-flash_add.append(0x00)
-flash_add.append(0x00)
-flash_add.append(0x00)
+flash_addr = bytearray()
+flash_addr.append(0x08)
+flash_addr.append(0x00)
+flash_addr.append(0x00)
+flash_addr.append(0x00)
+
+start_address = 0x08000000
 
 ACK_BYTE = 0x79
 NACK_BYTE = 0x1F
@@ -68,7 +68,7 @@ ser = serial.Serial(
         parity=serial.PARITY_EVEN,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=10) 
+        timeout=15) 
 
 def setupPeripherals():      
     # Setup RPi GPIOs
@@ -117,38 +117,88 @@ def eraseMemory():
         print("Error erasing FLASH")
     return b_success
 
-def __printSectionInfo (s):
-    print ('[{nr}] {name} {type} {addr} {offs} {size}'.format(
-                nr = s.header['sh_name'],
-                name = s.name,
-                type = s.header['sh_type'],
-                addr = s.header['sh_addr'],
-                offs = s.header['sh_offset'],
-                size = s.header['sh_size']
-    ))
 
-def processFile(filename):
-    print('In file: ' + filename)
-    with open(filename, 'rb') as f:
-        # get the data
-        elffile = ELFFile(f)
-        print ('sections:')
-        for s in elffile.iter_sections():
-            __printSectionInfo(s)
-        print ('Downloading .elf file to STM32')
-        
-
-def writeFlash(number_of_bytes):
+def flashSTM32(file_name, file_size):
     b_success = False
-    bytes = hex(number_of_bytes)
+    block_counter = 0
+    print("Downloading ", file_size, " bytes.")
+    # Each block can be at most 256 bytes. 
+    # Check how many blocks I need to write 
+    block_size = 256
+    blocks = int(file_size/block_size)
+
+    write_address = start_address
+
+    # Open file 
+    f = open(file_name,'rb') 
+    for i in range(blocks):
+        if writeMemory(f, block_size) == True:
+            block_counter = block_counter + 1
+        write_address = write_address + 256
+        updateAddressByteArray(write_address)
+    
+    # Send data that didn't fit in a block
+    rest_bytes = file_size - (blocks*block_size)
+    if rest_bytes < 0 or rest_bytes > 255:
+        b_success = False
+    else:
+        if writeMemory(f, rest_bytes) == True:
+            b_success = True
+            block_counter = block_counter + 1
+
+    f.close()
+    return b_success
+
+
+def writeMemory(file_id, block_size):
+    b_success = False
+    # Send write memory command
     ser.write(write_memory)
     response_byte = ser.read()
+    # If the command is recognised, start writing bytes
     if int(response_byte.hex(),16) == ACK_BYTE:
-        ser.write(flash_add)
-        ser.write(0x08)    #checksum?
+        # Read block of data from .bin file 
+        buffer = file_id.read(block_size)
+        # Calculate data checksum
+        data_checksum = calcChecksum(block_size, buffer)
+        addr_checksum = flash_addr[0] ^ flash_addr[1] ^ flash_addr[2] ^ flash_addr[3]
+        addr_checksum_ba = bytearray()
+        addr_checksum_ba.append(addr_checksum)
+        # Send address and "checksum"
+        ser.write(flash_addr)
+        ser.write(addr_checksum_ba)
         if int(response_byte.hex(),16) == ACK_BYTE:
-            ser.write(bytes)
+            #Send number of bytes to write N-1
+            data_lump = bytearray()
+            data_lump.append(block_size - 1)
+            for byte in buffer:
+                data_lump.append(byte)
+            data_lump.append(data_checksum)
+            ser.write(data_lump)
+            response_byte = ser.read()
+            if int(response_byte.hex(),16) == ACK_BYTE:
+                print('.',end='', flush=True)
+                sleep(0.5)
+                b_success = True
     return b_success
+        
+
+def updateAddressByteArray(new_address):
+    flash_addr[0] = (new_address >> 24) & 0xFF   # This gets the MSB
+    flash_addr[1] = (new_address >> 16) & 0xFF
+    flash_addr[2] = (new_address >> 8) & 0xFF
+    flash_addr[3] = (new_address) & 0xFF         # LSB
+
+def calcChecksum(buf_size, buffer):
+    n_ba = bytearray()
+    N = buf_size - 1
+    n_ba.append(N)
+    checksum =  n_ba[0] ^ buffer[0]
+    for index in range(buf_size - 1):
+        checksum = checksum ^ buffer[index + 1]
+        
+    return checksum
+    
 
 def endFlash():
     # Restart board
@@ -164,13 +214,16 @@ def endFlash():
 
 def main():
     filename = sys.argv[-1]
+    file_size = os.path.getsize(str(filename))
     setupPeripherals()
     beginFlash()
-    processFile(str(filename))
-    #if startCommands() == True:
-        #if eraseMemory() == True:
-            #print("Finished")
-            #endFlash()
+    if startCommands() == True:
+        if eraseMemory() == True:
+            if flashSTM32(str(filename), file_size) == True:
+                print("\nDownload of ", file_size, " successful")
+                endFlash()
+            else: 
+                print("Error writing into flash")
 
 
 if __name__ == "__main__":
