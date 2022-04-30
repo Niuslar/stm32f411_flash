@@ -215,6 +215,9 @@ def endFlash():
 max_flash_size = 512*1024 #512kB
 
 def main():
+    if len(sys.argv) != 2:
+        print("Usage: ./stm32f411_flashe.py path/to/file.bin")
+        return
     filename = sys.argv[-1]
     file_size = os.path.getsize(str(filename))
     if file_size > max_flash_size:
