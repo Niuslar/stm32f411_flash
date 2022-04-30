@@ -14,7 +14,7 @@ To use it, make the following connections:
 |  PIN 10 | PA9  (TX)*    |
 |  PIN 11 | NRST          |
 
-* This is using USART1, other USART Pins could be used. Check [Application Note AN2606](https://www.st.com/resource/en/application_note/cd00167594-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
+*This is using USART1, other USART Pins could be used. Check [Application Note AN2606](https://www.st.com/resource/en/application_note/cd00167594-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 [Raspberry Pi Pinout reference](https://linuxhint.com/wp-content/uploads/2022/02/gpio-pinout-raspberry-pi-01.png)
 
   ## Using the script 
