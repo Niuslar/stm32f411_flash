@@ -212,9 +212,14 @@ def endFlash():
     GPIO.cleanup()
     ser.close()
 
+max_flash_size = 512*1024 #512kB
+
 def main():
     filename = sys.argv[-1]
     file_size = os.path.getsize(str(filename))
+    if file_size > max_flash_size:
+        print("Error, .bin file too big")
+        return
     setupPeripherals()
     beginFlash()
     if startCommands() == True:
@@ -224,6 +229,10 @@ def main():
                 endFlash()
             else: 
                 print("Error writing into flash")
+        else:
+            print("Error erasing memory")
+    else:
+        print("Error sending write memory command")
 
 
 if __name__ == "__main__":
