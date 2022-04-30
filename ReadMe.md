@@ -17,8 +17,7 @@ To use it, make the following connections:
 [Raspberry Pi Pinout reference](https://linuxhint.com/wp-content/uploads/2022/02/gpio-pinout-raspberry-pi-01.png)
 
   ## Using the script 
-
-  To use the script, simply add the path to the .bin file when executing it. 
+  Add the path to the .bin file after the script name.
   ### Example:
   ```
   ./stm32f411_flasher.py blink_led.bin
