@@ -64,7 +64,7 @@ NACK_BYTE = 0x1F
 #Setup serial comm
 ser = serial.Serial(
         port='/dev/ttyAMA0',
-        baudrate=9600,
+        baudrate=115200,
         parity=serial.PARITY_EVEN,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
@@ -178,7 +178,7 @@ def writeMemory(file_id, block_size):
             response_byte = ser.read()
             if int(response_byte.hex(),16) == ACK_BYTE:
                 print('.',end='', flush=True)
-                sleep(0.5)
+                sleep(0.1)
                 b_success = True
     return b_success
         
