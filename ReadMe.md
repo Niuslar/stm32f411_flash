@@ -14,6 +14,8 @@ To use it, make the following connections:
 |  PIN 10 | PA9  (TX)     |
 |  PIN 11 | NRST          |
 
+[Raspberry Pi Pinout reference](https://linuxhint.com/wp-content/uploads/2022/02/gpio-pinout-raspberry-pi-01.png)
+
   # Using the script 
 
   To use the script, simply add the path to the .bin file when executing it. 
@@ -21,5 +23,9 @@ To use it, make the following connections:
   ```
   ./stm32f411_flasher.py blink_led.bin
   ```
+  
+  ## Notes: 
+  UART Must be enabled on the Raspberry Pi to use this script and it MUST use /dev/ttyAMA0. 
+  /dev/ttyS0 or /dev/serial0 do not support even parity check very well, which is needed for the bootloader. 
 
   
