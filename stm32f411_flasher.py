@@ -14,22 +14,6 @@ RESET = 11
 # Bootloader commands
 uart_select_command = b'\x7F'
 
-get_version = bytearray()
-get_version.append(0x00)
-get_version.append(0xFF)
-
-get_version_and_read_ps = bytearray()
-get_version_and_read_ps.append(0x01)
-get_version_and_read_ps.append(0xFE)
-
-get_id = bytearray()
-get_id.append(0x02)
-get_id.append(0xFD)
-
-read_memory = bytearray()
-read_memory.append(0x11)
-read_memory.append(0xEE)
-
 write_memory = bytearray()
 write_memory.append(0x31)
 write_memory.append(0xCE)
@@ -40,13 +24,6 @@ erase_memory.append(0xBB)
 
 global_erase = bytes.fromhex('ffff')
 
-read_unprotect = bytearray()
-read_unprotect.append(0x92)
-read_unprotect.append(0x6D)
-
-read_protect = bytearray()
-read_protect.append(0x82)
-read_protect.append(0x7D)
 
 # Flash memory address
 flash_addr = bytearray()
@@ -99,6 +76,7 @@ def startCommands():
         print("UART Recognised, ready to erase flash")
         b_success = True
     return b_success
+
 
 def eraseMemory():
     b_success = False
