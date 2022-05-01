@@ -11,12 +11,14 @@ To use it, make the following connections:
 |  PIN 3  | BOOT0         |
 |  PIN 5  | PB2 (BOOT1)   |
 |  PIN 6  | GND           |
+|  PIN 7  | PA5 (LED)*    |  
 |  PIN 8  | PA10 (RX)**   |
 |  PIN 10 | PA9  (TX)**   |
 |  PIN 11 | NRST          |
 [Raspberry Pi Pinout reference](https://linuxhint.com/wp-content/uploads/2022/02/gpio-pinout-raspberry-pi-01.png)
 
-*I used a Nucleo-64 board and used the E5V pin to power it. JP5 needs to be in the correct position to use this pin. 
+*I used a Nucleo-64 which has a green LED pin (PA5) and a pin to power the board with 5V (EV5). To use EV5, JP5 needs to be in the correct position.
+Using the LED is completely optional, it just blinks when writing data. 
 
 *This is using USART1, other USART Pins could be used. Check [Application Note AN2606](https://www.st.com/resource/en/application_note/cd00167594-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 
