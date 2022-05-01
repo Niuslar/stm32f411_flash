@@ -96,7 +96,7 @@ def startCommands():
     ser.write(uart_select_command)
     response_byte = ser.read()
     if int(response_byte.hex(),16) == ACK_BYTE: 
-        print("UART Recognised, ready to erase FLASH")
+        print("UART Recognised, ready to erase flash")
         b_success = True
     return b_success
 
@@ -109,17 +109,17 @@ def eraseMemory():
         ser.write(b'\x00') # Checksum for global erase command
         response_byte = ser.read()
         if int(response_byte.hex(),16) == ACK_BYTE:
-            print("FLASH successfuly erased")
+            print("Flash successfuly erased")
             b_success = True
     if b_success == False:
-        print("Error erasing FLASH")
+        print("Error erasing flash")
     return b_success
 
 
 def flashSTM32(file_name, file_size):
     b_success = False
     block_counter = 0
-    print("Downloading ", file_size, " bytes.")
+    print("Downloading ", file_size, " bytes")
     # Each block can be at most 256 bytes. 
     # Check how many blocks I need to write 
     block_size = 256
