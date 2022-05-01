@@ -7,6 +7,7 @@ import sys
 import os
 
 # RPi GPIO Pins used for flashing
+LED = 7
 BOOT0 = 3
 BOOT1 = 5
 RESET = 11
@@ -50,6 +51,7 @@ def setupPeripherals():
     # Setup RPi GPIOs
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(LED, GPIO.OUT)
     GPIO.setup(BOOT0,GPIO.OUT)
     GPIO.setup(BOOT1,GPIO.OUT)
     GPIO.setup(RESET,GPIO.OUT)
@@ -154,7 +156,10 @@ def writeMemory(file_id, block_size):
             response_byte = ser.read()
             if int(response_byte.hex(),16) == ACK_BYTE:
                 print('.',end='', flush=True)
-                sleep(0.05)
+                GPIO.output(LED, GPIO.HIGH)
+                sleep(0.02)
+                GPIO.output(LED, GPIO.LOW)
+                sleep(0.03)
                 b_success = True
     return b_success
         
