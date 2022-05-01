@@ -154,7 +154,7 @@ def writeMemory(file_id, block_size):
             response_byte = ser.read()
             if int(response_byte.hex(),16) == ACK_BYTE:
                 print('.',end='', flush=True)
-                sleep(0.1)
+                sleep(0.05)
                 b_success = True
     return b_success
         
