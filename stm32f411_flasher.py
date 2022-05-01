@@ -75,7 +75,8 @@ def startCommands():
     ser.write(uart_select_command)
     response_byte = ser.read()
     if int(response_byte.hex(),16) == ACK_BYTE: 
-        print("UART Recognised, ready to erase flash")
+        print("UART Recognised")
+        print("Erasing flash memory")
         b_success = True
     return b_success
 
@@ -89,10 +90,10 @@ def eraseMemory():
         ser.write(b'\x00') # Checksum for global erase command
         response_byte = ser.read()
         if int(response_byte.hex(),16) == ACK_BYTE:
-            print("Flash successfuly erased")
+            print("Flash memory successfuly erased")
             b_success = True
     if b_success == False:
-        print("Error erasing flash")
+        print("Error erasing flash memory")
     return b_success
 
 
@@ -133,15 +134,19 @@ def writeMemory(file_id, block_size):
     # Send write memory command
     ser.write(write_memory)
     response_byte = ser.read()
+
     # If the command is recognised, start writing bytes
     if int(response_byte.hex(),16) == ACK_BYTE:
         # Read block of data from .bin file 
         buffer = file_id.read(block_size)
         # Calculate data checksum
         data_checksum = calcChecksum(block_size, buffer)
+
+        # Calculate address checksum
         addr_checksum = flash_addr[0] ^ flash_addr[1] ^ flash_addr[2] ^ flash_addr[3]
         addr_checksum_ba = bytearray()
         addr_checksum_ba.append(addr_checksum)
+
         # Send address and "checksum"
         ser.write(flash_addr)
         ser.write(addr_checksum_ba)
@@ -183,7 +188,7 @@ def calcChecksum(buf_size, buffer):
 
 def endFlash():
     # Restart board
-    print('Reseting STM32 Board')
+    print('Reseting STM32F')
     GPIO.output(BOOT0, GPIO.LOW)
     GPIO.output(RESET, GPIO.LOW)
     sleep(0.1)
