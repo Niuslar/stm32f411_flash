@@ -215,13 +215,13 @@ def main():
         if eraseMemory() == True:
             if flashSTM32(str(filename), file_size) == True:
                 print("\nDownload of ", file_size, " successful")
-                endFlash()
             else: 
                 print("Error writing into flash")
         else:
             print("Error erasing memory")
     else:
         print("Error sending write memory command")
+    endFlash()
 
 
 if __name__ == "__main__":
