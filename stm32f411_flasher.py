@@ -167,12 +167,12 @@ def writeMemory(file_id, block_size):
         ser.write(addr_checksum_ba)
         if int(response_byte.hex(),16) == ACK_BYTE:
             #Send number of bytes to write N-1
-            data_lump = bytearray()
-            data_lump.append(block_size - 1)
+            data_payload = bytearray()
+            data_payload.append(block_size - 1)
             for byte in buffer:
-                data_lump.append(byte)
-            data_lump.append(data_checksum)
-            ser.write(data_lump)
+                data_payload.append(byte)
+            data_payload.append(data_checksum)
+            ser.write(data_payload)
             response_byte = ser.read()
             if int(response_byte.hex(),16) == ACK_BYTE:
                 print('.',end='', flush=True)
