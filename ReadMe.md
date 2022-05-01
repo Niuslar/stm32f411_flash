@@ -26,7 +26,7 @@ Using the LED is completely optional, it just blinks when writing data.
   Add the path to the .bin file after the script name.
   ### Example:
   ```
-  ./stm32f411_flasher.py blink_led.bin
+  ./stm32_flash_loader.py blink_led.bin
   ```
   
   ## Notes: 
