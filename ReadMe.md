@@ -18,6 +18,7 @@ To use it, make the following connections:
 [Raspberry Pi Pinout reference](https://linuxhint.com/wp-content/uploads/2022/02/gpio-pinout-raspberry-pi-01.png)
 
 *I used a Nucleo-64 which has a green LED pin (PA5) and a pin to power the board with 5V (EV5). To use EV5, JP5 needs to be in the correct position.
+Using the LED is completely optional, it just blinks when writing data. 
 
 *This is using USART1, other USART Pins could be used. Check [Application Note AN2606](https://www.st.com/resource/en/application_note/cd00167594-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 
