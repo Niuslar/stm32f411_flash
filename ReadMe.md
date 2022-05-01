@@ -11,6 +11,7 @@ To use it, make the following connections:
 |  PIN 3  | BOOT0         |
 |  PIN 5  | PB2 (BOOT1)   |
 |  PIN 6  | GND           |
+|  PIN 7  | PA5 (LED)*    |  
 |  PIN 8  | PA10 (RX)**   |
 |  PIN 10 | PA9  (TX)**   |
 |  PIN 11 | NRST          |
