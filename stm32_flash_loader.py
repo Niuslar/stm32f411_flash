@@ -203,25 +203,32 @@ max_flash_size = 512*1024 #512kB
 def main():
     if len(sys.argv) != 2:
         print("Use: ./stm32_flash_loader.py path/to/file.bin")
-        return
+        sys.exit(1)
     filename = sys.argv[-1]
     file_size = os.path.getsize(str(filename))
     if file_size > max_flash_size:
         print("Error, .bin file too big")
-        return
+        sys.exit(1)
     setupPeripherals()
     beginFlash()
     if startCommands() == True:
         if eraseMemory() == True:
             if flashSTM32(str(filename), file_size) == True:
                 print("\nDownload of ", file_size, " successful")
+                endFlash()
+                sys.exit(0)
             else: 
                 print("Error writing into flash")
+                endFlash()
+                sys.exit(1)
         else:
             print("Error erasing memory")
+            endFlash()
+            sys.exit(1)
     else:
-        print("Error sending write memory command")
-    endFlash()
+        print("UART not recognised, check connections")
+        endFlash()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
