@@ -7,10 +7,10 @@ import sys
 import os
 
 # RPi GPIO Pins used for flashing
-LED = 7
+LED = 11
 BOOT0 = 3
 BOOT1 = 5
-RESET = 11
+RESET = 7
 
 # Bootloader commands
 uart_select_command = b'\x7F'
