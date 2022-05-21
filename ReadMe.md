@@ -7,8 +7,8 @@ To use it, make the following connections:
 
 |   R-Pi  | STM32F411xx   |
 | ------  | ------------- |
-|  PIN 2  | E5V*          |
 |  PIN 3  | BOOT0         |
+|  PIN 4  | E5V*          |
 |  PIN 5  | PB2 (BOOT1)   |
 |  PIN 6  | GND           |
 |  PIN 7  | NRST          |
