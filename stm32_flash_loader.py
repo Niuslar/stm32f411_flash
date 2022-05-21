@@ -73,27 +73,37 @@ def beginFlash():
 def startCommands():
     b_success = False
     ser.write(uart_select_command)
-    response_byte = ser.read()
-    if int(response_byte.hex(),16) == ACK_BYTE: 
-        print("UART Recognised")
-        print("Erasing flash memory")
-        b_success = True
+    try:
+        response_byte = int(ser.read().hex(),16)
+    except ValueError:
+        return b_success
+    else:
+        if response_byte == ACK_BYTE: 
+            print("UART Recognised")
+            print("Erasing flash memory")
+            b_success = True
     return b_success
 
 
 def eraseMemory():
     b_success = False
     ser.write(erase_memory)
-    response_byte = ser.read()
-    if int(response_byte.hex(),16) == ACK_BYTE: 
-        ser.write(global_erase)
-        ser.write(b'\x00') # Checksum for global erase command
-        response_byte = ser.read()
-        if int(response_byte.hex(),16) == ACK_BYTE:
-            print("Flash memory successfuly erased")
-            b_success = True
-    if b_success == False:
-        print("Error erasing flash memory")
+    try:
+        response_byte = int(ser.read().hex(),16)
+    except ValueError:
+        return b_success
+    else:
+        if response_byte == ACK_BYTE: 
+            ser.write(global_erase)
+            ser.write(b'\x00') # Checksum for global erase command
+            try:
+                response_byte = int(ser.read().hex(),16)
+            except ValueError:
+                return b_success
+            else:
+                if response_byte == ACK_BYTE:
+                    print("Flash memory successfuly erased")
+                    b_success = True
     return b_success
 
 
@@ -133,39 +143,51 @@ def writeMemory(file_id, block_size):
     b_success = False
     # Send write memory command
     ser.write(write_memory)
-    response_byte = ser.read()
+    try:
+        response_byte = int(ser.read().hex(),16)
+    except ValueError:
+        return b_success
+    else:
+        # If the command is recognised, start writing bytes
+        if response_byte == ACK_BYTE:
+            # Read block of data from .bin file 
+            buffer = file_id.read(block_size)
+            # Calculate data checksum
+            data_checksum = calcChecksum(block_size, buffer)
 
-    # If the command is recognised, start writing bytes
-    if int(response_byte.hex(),16) == ACK_BYTE:
-        # Read block of data from .bin file 
-        buffer = file_id.read(block_size)
-        # Calculate data checksum
-        data_checksum = calcChecksum(block_size, buffer)
+            # Calculate address checksum
+            addr_checksum = flash_addr[0] ^ flash_addr[1] ^ flash_addr[2] ^ flash_addr[3]
+            addr_checksum_ba = bytearray()
+            addr_checksum_ba.append(addr_checksum)
 
-        # Calculate address checksum
-        addr_checksum = flash_addr[0] ^ flash_addr[1] ^ flash_addr[2] ^ flash_addr[3]
-        addr_checksum_ba = bytearray()
-        addr_checksum_ba.append(addr_checksum)
-
-        # Send address and "checksum"
-        ser.write(flash_addr)
-        ser.write(addr_checksum_ba)
-        if int(response_byte.hex(),16) == ACK_BYTE:
-            #Send number of bytes to write N-1
-            data_payload = bytearray()
-            data_payload.append(block_size - 1)
-            for byte in buffer:
-                data_payload.append(byte)
-            data_payload.append(data_checksum)
-            ser.write(data_payload)
-            response_byte = ser.read()
-            if int(response_byte.hex(),16) == ACK_BYTE:
-                print('.',end='', flush=True)
-                GPIO.output(LED, GPIO.HIGH)
-                sleep(0.02)
-                GPIO.output(LED, GPIO.LOW)
-                sleep(0.03)
-                b_success = True
+            # Send address and "checksum"
+            ser.write(flash_addr)
+            ser.write(addr_checksum_ba)
+            try:
+                response_byte = int(ser.read().hex(),16)
+            except ValueError:
+                return b_success
+            else:
+                if response_byte == ACK_BYTE:
+                    #Send number of bytes to write N-1
+                    data_payload = bytearray()
+                    data_payload.append(block_size - 1)
+                for byte in buffer:
+                    data_payload.append(byte)
+                data_payload.append(data_checksum)
+                ser.write(data_payload)
+                try:
+                    response_byte = int(ser.read().hex(),16)
+                except ValueError:
+                    return b_success
+                else:
+                    if response_byte == ACK_BYTE:
+                        print('.',end='', flush=True)
+                        GPIO.output(LED, GPIO.HIGH)
+                        sleep(0.02)
+                        GPIO.output(LED, GPIO.LOW)
+                        sleep(0.03)
+                        b_success = True
     return b_success
         
 
