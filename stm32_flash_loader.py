@@ -130,6 +130,8 @@ def flashSTM32(file_name, file_size):
     rest_bytes = file_size - (blocks*block_size)
     if rest_bytes < 0 or rest_bytes > 255:
         b_success = False
+    elif rest_bytes == 0:
+        b_success = True
     else:
         if writeMemory(f, rest_bytes) == True:
             b_success = True
